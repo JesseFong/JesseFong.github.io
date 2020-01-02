@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="author" content="Jesse Fong">
+<title>A Guide To Learning To Program | Jesse Fong</title>
+<meta property="og:title" content="A Guide To Learning To Program">
+<meta name="twitter:title" content="A Guide To Learning To Program">
+<link rel="canonical" href="http://jessefong.com/blog_learning_to_program">
+<meta property="og:type" content="website">
+<meta property="og:url" content="http://jessefong.com/blog_learning_to_program">
+<meta property="og:site_name" content="Jesse Fong">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@JesseTheFong">
+<link rel="stylesheet" type="text/css" href="data/styles.css">
+</head>
+<body>
+<div class="header_background">
+<div style="height:1rem;"></div>
+	<table class="header_table">
+	<tbody>
+	<tr>
+	<td> 
+        <a href="projects.html" class="header_title">Jesse Fong</a>
+        </td>
+	</tr>
+	</tbody>
+	</table>
+	<div class="header_links">
+	<table class="header_table">
+	<tbody>
+	<tr>
+        <td><a href="index.html" class="header_link">Blog</a></td>
+        <td><a href="projects.html" class="header_link">Projects</a></td>
+        <td><a href="about.html" class="header_link">About</a></td>
+        <td><a href="contact.html" class="header_link">Contact</a></td>
+	</tr>
+	</tbody>
+	</table>
+	</div>
+</div><div class="page_content">
+<div class="header_image_container"><div class="header_image" style="background-image:url(' data/koi.png');"></div></div>
+<div class="standalone_link_container"><a class="link" href="index.html">Back</a></div><h1>A Guide To Learning To Program</h1>
+<h2>9 June 2019</h2>
+<p>
+The following was the first programming tutorial I followed. </p><div class="code"><pre>
+<span class="code_text" style="color: #26AAC6;">#include</span> <span class="code_text" style="color: #6B8E23;">&lt;stdio.h&gt;</span> <span class="code_text" style="color: #7D7D7D;">// Ignore this for now</span>
+	   
+<span class="code_text" style="color: #CD950C;">int</span> main(<span class="code_text" style="color: #CD950C;">int</span> argc, <span class="code_text" style="color: #CD950C;">char</span> **argv) <span class="code_text" style="color: #7D7D7D;">//Ignore these for now </span>
+{
+    printf(); <span class="code_text" style="color: #7D7D7D;">//Type in "Hello World" between the parenthesis and hit run</span>
+    <span class="code_text" style="color: #CD950C;">return</span> <span class="code_text" style="color: #6B8E23;">0</span>;
+} </pre></div><p>Simple enough. The 'Hello World' tutorial is a common one. A little console in the browser popped up and displayed my message. </p><p>At the time I knew a lot about tinkering with computers. I had just built a great one to play games and between school work, creative endeavors, and the Internet, I spent most of my time on them. Unfortunately, 'Computer Tinkerer' is not a job title and I knew nothing about programming.</p><p>This tutorial was my first accomplishment down a long road and yet, part of it made me even less hopeful than before.</p><div class="code"><pre><span class="code_text" style="color: #26AAC6;">#include</span> <span class="code_text" style="color: #6B8E23;">&lt;stdio.h&gt;</span> <span class="code_text" style="color: #7D7D7D;">// Ignore this for now</span>
+	   
+<span class="code_text" style="color: #CD950C;">int</span> main(<span class="code_text" style="color: #CD950C;">int</span> argc, <span class="code_text" style="color: #CD950C;">char</span> **argv) <span class="code_text" style="color: #7D7D7D;">//Ignore this for now </span>
+</pre></div><p>All I did was type in the message. It seems like these are what actually did the work and yet I'm being told to ignore them. What do they do? Actually, how did chrome even know how to display this message? Do computers understand text? I thought it was 1's and 0's. Even if it is, how does a computer understand 1's and 0's? </p><p>Here's how I wish my first 'Hello World' tutorial went.</p><p>Preface: </p><p>Before you go on, I am assuming you want to learn how to program. I am also assuming this isn't the first thing you're reading about it. I'm assuming you know that there are multiple programming languages and that SOMEHOW they tell a CPU what to do in different ways. I am also assuming you were previously employed as a Senior Computer Tinkerer at minimum, 2 years of experience. So when I say something like "Run a program" you know what I'm talking about. Ok, resume looks good. I see you have experience with making it so your wallpaper changes every 10 minutes. That's something we're looking for in a candidate.</p><p>Step 1: How text is represented by numbers which tells a computer what to do</p><div class="standalone_link_container"><a class="link" href="https://en.wikipedia.org/wiki/Code:_The_Hidden_Language_of_Computer_Hardware_and_Software">Read This Book.</a></div><p> I'm not kidding. </p><p>This book is a great history on how society got to representing information with symbols and numbers. It starts with sign language and ends with  an adding computer. All you will EVER do on a computer is mess with numbers that represent other things. Read this book.</p><p>Step 2: Setting up your development environment</p><p>So, by now you know how a computer stores and interprets information. You may not know how a modern CPU works but you can kind of guess its a better version of what you just read. And Hey! now you know how a text file COULD be interpreted by a computer. You just don't know how your computer currently does it.</p><p>Now we're gonna set up a "development environment." This means that we will set up a program or programs to tell the cpu to run some code that we write. But first some explanation.  You know how the CODE book ended with a very dumb computer that added two numbers? Well humans have been working hard on computers since then. Now we have operating systems that are a billion lines of code large and thousands of programming languages and CPUs that have so many transistors in such small space that they have to account for quantum dynamics when building them. I just want to let you know that IT IS OVERWHELMING. So, take that how you will. The good news is that all of these things mostly break down into those simple instructions that you know already (there are more, don't get smug yet). The bad news is, it's ACTUALLY doing these instructions, a lot of them and in very complicated ways and you wont live long enough to understand it all. But you can get to the point where you PRETTY MUCH know how everything works, it'll just take years. </p><p>Right, development environment. So, how does a modern CPU get instructions. Well, your Operating System does that for you right now.  Going on in the background while you read this, the only program that is allowed to talk to your CPU is the operating system.  That doesn't have to be true, but if you are reading this, that is what is happening. Your operating software is telling your cpu to do its work and it is juggling many plates, believe it or not, the cpu is running all of your programs separately and switching between them with what is called a <a class="link" href="https://www.tutorialspoint.com/operating_system/os_process_scheduling.htm">Scheduler.</a> it's a lot of work but like I said, it feels overwhelming because it is.</p><p>So, how do we tell the operating system to run OUR code? The answer is, we run our program like any other one. We just need any text editor to type into, save that file with an extension that a Compiler (Programs that take human readable text and turn them into computer instructions) knows what to do with, and THEY will output our program, give that list of instructions to the OS which will then schedule it out to the CPU to include us on the list of running programs. </p><p>There are MANY programs that people have written that take text files and give them to the CPU. If you're on Windows, Microsoft has started giving theirs out <a class="link" href="https://visualstudio.microsoft.com/">for free.</a> Here's a <a class="link" href="https://en.wikipedia.org/wiki/List_of_compilers">list of some of them</a> but the one we will be using to keep things simple is <a class="link" href="https://www.onlinegdb.com/online_c_compiler">this</a> OH BOY LOOK WHAT IS ALREADY ON THE SCREEN. </p><p>But before you hit run and then work on your game engine next, I want to explain how this is cheating but it's actually not. This website (I am guessing) will be running your code on their servers' CPU, not yours. I would talk you through understanding how visual studio works but I'm trying to keep this tutorial to a year at the most. So yeah, that's going to be extra credit I guess. BUT your code IS running somewhere. When you hit run. The website has code that takes the text that you wrote to their servers, compiles it, runs it, and displays what it is doing back to you through your web browser. If you don't believe me, watch <a class="link" href="https://www.youtube.com/watch?v=2GtbY1XWGlQ">dwangoAC get his local IRC client get taken over by twitch chat</a>.</p><p>So hopefully you believe me by now. So before I tell you what this code is doing I want you to know at least on a surface level what a C compiler is doing. So, <a class="link" href="https://www.youtube.com/watch?v=n4fI4eUTTKM&list=PLEMXAbCVnmY6g5MieyXxQhQXRgEqNPD7B&index=13">watch this 4 hour long video</a> See you soon!</p><p>Step 3: The Darkness</p><p>Congratulations on making it this far. Seriously, even if most of that video went over your head, you should be proud for trying. Programming is incredibly difficult to understand and I watch that video at least once a year a still learn things from it.  From my experience, there is so much jargon and concepts in programming that not only have very specific definitions that you need to know but certain mindsets or experiences that you have had to have in order to truly understand what that person is talking about. I guess that's how language as a whole works as well.  </p><p>What I wanted you to get from that video is that this isn't magic. The computer ecosystem is vast and running on trillions of lines of code and so many cpu instructions they represent a number that would make the universe seem microscopic. But, it's not magic. All of these things have been written by people and so when you see the line </p><div class="code"><pre> <span class="code_text" style="color: #26AAC6;">#include</span> <span class="code_text" style="color: #6B8E23;">&lt;stdio.h&gt;</span> </pre></div><p> 
+I want you to know that someone who, was writing the C language which compiled down into Assembly language, decided that the '#' was going to tell the cpu to do something during compilation and that "INCLUDE" means that that something was to include another TEXT file as if it was part of this one. Literally copy and paste. And what did the compiler paste in? <stdio.h>: A text file that a committee wrote (and has been revising for over 20 years) that includes a lot of pre-written code that adheres to a standard that they have come up with, which does a lot of things that a lot of programs want to do. SUCH AS talking to the operating system, or doing math, or in our case, talking to input and output devices such as the keyboard and the console window. Inside stdio.h there is a function called printf(); lets just take a quick look at what that does.</p><p>Step 4: <u>CRT</u>STDIO<u>INLINE int </u><u>CRTDECL printf(</u>In<u>z</u><u>Printf</u>format<u>string</u> char const<i> const </i><u><i>Format,</i></u><u><i>
+    ...))</i></u><u><i>
+	
+This is Microsoft's definition of the function printf(). </i></u><u><i>
+Do you notice how some of the text is underlined? </i></u></p><p><i>Check</i><u><i>return</i></u><i>opt</i><i>CRT</i><u><i>STDIO</i></u><i>INLINE int </i><i>CRTDECL </i><u><i>vfprintf</i></u><i>l(</i><u><i>Inout</i></u><i>  FILE</i>       const <u>Stream,</u>In<u>z</u>   char const<i> const </i><u><i>Format,</i></u><i>In</i><u><i>opt</i></u><u><i>locale</i></u><i>t   const </i><u><i>Locale,</i></u><u><i>
+                 va</i></u><i>list           </i><u><i>ArgList</i></u><u><i>
+        )</i></u><u><i>
+    #if defined </i></u><i>NO</i><u><i>CRT</i></u><i>STDIO</i><u><i>INLINE</i></u><u><i>
+    ;</i></u><u><i>
+    #else</i></u><u><i>
+00007FF7FFD25F40  mov         qword ptr [rsp+20h],r9  </i></u><u><i>
+00007FF7FFD25F45  mov         qword ptr [rsp+18h],r8  </i></u><u><i>
+00007FF7FFD25F4A  mov         qword ptr [rsp+10h],rdx  </i></u><u><i>
+00007FF7FFD25F4F  mov         qword ptr [rsp+8],rcx  </i></u><u><i>
+00007FF7FFD25F54  sub         rsp,38h  </i></u><u><i>
+        return </i></u><u><i>stdio</i></u><i>common</i><u><i>vfprintf(</i></u><i>CRT</i><u><i>INTERNAL</i></u><i>LOCAL</i><u><i>PRINTF</i></u><i>OPTIONS, </i><u><i>Stream, </i></u><i>Format, </i><u><i>Locale, </i></u><i>ArgList);</i><i>
+00007FF7FFD25F58  call        </i><i>local</i><u><i>stdio</i></u><i>printf</i><u><i>options (07FF7FFD25F30h)  </i></u><u><i>
+00007FF7FFD25F5D  mov         rcx,qword ptr [</i></u><i>ArgList]  </i><i>
+00007FF7FFD25F62  mov         qword ptr [rsp+20h],rcx  </i><i>
+00007FF7FFD25F67  mov         r9,qword ptr [</i><u><i>Locale]  </i></u><u><i>
+00007FF7FFD25F6C  mov         r8,qword ptr [</i></u><i>Format]  </i><i>
+00007FF7FFD25F71  mov         rdx,qword ptr [</i><u><i>Stream]  </i></u><u><i>
+00007FF7FFD25F76  mov         rcx,qword ptr [rax]  </i></u><u><i>
+00007FF7FFD25F79  call        </i></u><u><i>stdio</i></u><i>common</i><u><i>vfprintf (07FF7FFD3DB30h)  </i></u><u><i>
+00007FF7FFD25F7E  add         rsp,38h  </i></u><u><i>
+00007FF7FFD25F82  ret  </i></u></p><p><u><i>Step 20: Hello World</i></u></p><p><u><i>Just type in "Hello World" between the parenthesis and hit run.</i></u></p></div>
+<div class="separator reverse"></div>
+<div class="footer">
+
+
+</div></body>
+</html>

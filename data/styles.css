@@ -1,8 +1,8 @@
 :root 
 {
 	--highlight-color: rgb(200, 200, 200);
-    --link-color: red;
-    --link-hover-color: blue;
+    --link-color: #536777;
+    --link-hover-color: #b5b9bf;
 	background-color: #4C4C47
 }
 
@@ -31,25 +31,25 @@ html{font-size:1.10rem;}
 @font-face
 {
     font-family: 'Header';
-    src: url('./RedHatDisplay-Regular.ttf') format('truetype');
+    src: url('./FjallaOne-Regular.ttf') format('truetype');
 }
 
 @font-face
 {
     font-family: 'Title';
-    src: url('./RedHatText-Bold') format('truetype');
+    src: url('./FjallaOne-Regular.ttf') format('truetype');
 }
 
 @font-face
 {
     font-family: 'Body';
-	src: url('./SourceSerifPro-Regular.ttf') format('truetype');
+	src: url('./LibreBaskerville-Regular.ttf') format('truetype');
 }
 
 @font-face
 {
     font-family: 'Mono';
-	src: url('./liberation-mono.ttf') format('truetype');
+	src: url('./FiraCode-Regular.ttf') format('truetype');
 }
 
 *
@@ -77,6 +77,7 @@ h1
     font-family: 'Title';
     text-transform: uppercase;
     font-size: 1.5em;
+	letter-spacing: 1px;
 }
 
 h2
@@ -87,13 +88,14 @@ h2
 	padding-bottom: 1em;
     font-family: 'Title';
     font-size: 1.2em;
+	letter-spacing: 1px;
 }
 
 p
 {
 	font-size: 1.2em;
-    padding-bottom: 1em;
-    padding-top: 1em;
+    padding-bottom: 0.1em;
+    padding-top: 0.2em;
     padding-left: 2%;
     padding-right: 7%;
 }
@@ -277,8 +279,8 @@ iframe {
     margin-right: 5%;
 	margin-top: 1em;
     margin-bottom: 1em;
-    padding-top: 2em;
-    padding-bottom: 2em;
+    padding-top: 1.5em;
+    padding-bottom: 1.5em;
     background-color: #1e1e1e;
     color: #ba8e4c;
     font-family: 'Mono';
@@ -307,19 +309,20 @@ iframe {
 
 .thumbnail_image
 {
-	width: 31%;
+	width: 30%;
 	overflow: hidden;
 	margin-right: 0.5em;
 	margin-bottom: 0.2em;
+	padding-top: 0.5em;
 	opacity: 0.8;
-	transition: opacity 0.1s ease;
+	transition: opacity 0.2s ease;
 	border-radius: 4px;
 }
 
 .thumbnail_image:hover
 {
 	opacity: 1;
-	transition: opacity 0.1s ease;
+	transition: opacity 0.2s ease;
 }
 
 .image

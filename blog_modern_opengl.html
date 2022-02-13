@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="author" content="Jesse Fong">
+<title>Leveraging Modern OpenGL (4.5) For A Simple Rendering API | Jesse Fong</title>
+<meta property="og:title" content="Leveraging Modern OpenGL (4.5) For A Simple Rendering API">
+<meta name="twitter:title" content="Leveraging Modern OpenGL (4.5) For A Simple Rendering API">
+<link rel="canonical" href="http://jessefong.com/blog_modern_opengl">
+<meta property="og:type" content="website">
+<meta property="og:url" content="http://jessefong.com/blog_modern_opengl">
+<meta property="og:site_name" content="Jesse Fong">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@JesseTheFong">
+<link rel="stylesheet" type="text/css" href="data/styles.css">
+</head>
+<body>
+<div class="header_background">
+<div style="height:1rem;"></div>
+	<table class="header_table">
+	<tbody>
+	<tr>
+	<td> 
+        <a href="projects.html" class="header_title">Jesse Fong</a>
+        </td>
+	</tr>
+	</tbody>
+	</table>
+	<div class="header_links">
+	<table class="header_table">
+	<tbody>
+	<tr>
+        <td><a href="index.html" class="header_link">Blog</a></td>
+        <td><a href="projects.html" class="header_link">Projects</a></td>
+        <td><a href="about.html" class="header_link">About</a></td>
+	</tr>
+	</tbody>
+	</table>
+	</div>
+</div><div class="page_content">
+<div class="header_image_container"><div class="header_image" style="background-image:url('data/minimal_bindless_opengl.PNG');"></div></div>
+<div class="standalone_link_container"><a class="link" href="index.html">Back</a></div><h1>Leveraging Modern OpenGL (4.5) For A Simple Rendering API</h1>
+<h2>20 June 2021</h2>
+<p><a class="link" href="https://github.com/JesseFong/minimal_modern_opengl">The full source of this sample can be found here</a><br><br>
+
+For the last few years I have been working with a few OpenGL functions/concepts that have been very pleasing to use and I wanted to share my experience with them. These days OpenGL has been largely left by the wayside by most GPU programmers in favor of Vulkan and D3D12. There are very good reasons for that in terms of getting the most out of your GPU, or using modern technology like Mesh Shaders and Hardware Ray Tracing.
+However, most smaller projects will rarely see a speed up from switching from OpenGL and D3D11 and in fact, incur a large cost of writing and managing what is essentially your own driver layer. And while OpenGL is definitely showing it's age in terms of how large and confusing the specification has become, I wanted to document a subset of OpenGL I learned over the years that thinks about data in a modern way, is simple to use, and is quick to implement.
+<br><br>
+To be clear, this article is trying to be a conglomeration of techniques and how they work together rather than a tutorial on the individual concepts. There are many good tutorials out there and I will link the ones that have helped me along the way in their individual sections:
+<br><br>
+<a class="link" href="#MultiDrawElementsIndirect">MultiDrawElementsIndrect</a><br>
+<a class="link" href="#DSA">Direct State Access Functions</a><br>
+<a class="link" href="#DSA">Bindless Textures</a><br>
+<a class="link" href="#UBO">UBO/SSBO's</a><br>
+
+<br><br><h2>The End Goal</h2>
+
+<p>GPU API programming is mostly about describing your data to the driver. Descriptors, Layouts, and Bindings are all telling the GPU and driver how to interpret your data correctly for when actual graphics work you want is getting done. The more specific you can get about those descriptions, the more the GPU and OpenGL can optimize for you. By sacrificing a little of that optimization, (mainly, memory usage and indirection in shaders) we are able to wittle down our OpenGL layer to just a few calls. As much as possible I want to cut down on the overhead of writing code that gets us to those shaders. I want to hand OpenGL a few generalized buffers and be able to draw the whole frame.</p>
+
+<br><br><h2 id="MultiDrawElementsIndirect">MultiDrawElementsIndirect</h2>
+
+<p>
+<a class="link" href="https://docs.gl/gl4/glMultiDrawElementsIndirect">GLDoc's glMultiDrawIndirect</a><br>
+<a class="link" href="https://litasa.github.io/blog/2017/09/04/OpenGL-MultiDrawIndirect-with-Individual-Textures">Litasa's Blog Post on MultiDrawIndirect</a><br><br>
+If you are completely inexperienced with glMultiDraw functions, I'll give some overview because the rest of the article hinges around it.</p></p><div class="code"><pre>
+glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, NULL, <span class="code_text" style="color: #6B8E23;">1</span>, <span class="code_text" style="color: #6B8E23;">0</span>);
+<span class="code_text" style="color: #7D7D7D;">//there is also glMultiDrawArraysIndirect(); but we are focusing on the indices version</span>
+</pre></div><p>
+The 'DrawElements' refers to a standard indexed VBO draw</p><div class="code"><pre>glDrawElements(GL_TRIANGES, CountOfIndicesToDraw, FormatOfIndices, *PointerToIndices);
+<span class="code_text" style="color: #7D7D7D;">//As if we were calling this function many times.</span>
+</pre></div><p>
+
+The 'MultiDraw' refers to the driver consuming an array of these commands (one per draw command) with the format:</p><div class="code"><pre><span class="code_text" style="color: #CD950C;">struct</span> gl_draw_element_indirect_command {
+    GLuint Count; <span class="code_text" style="color: #7D7D7D;">//CountOfIndicesToDraw</span>
+    GLuint InstanceCount; 
+    GLuint FirstIndex; <span class="code_text" style="color: #7D7D7D;">//Location (Index) Of First Index In Buffer</span>
+    GLuint BaseVertex; <span class="code_text" style="color: #7D7D7D;">//Location (Index) Of First Vertex In Buffer</span>
+    GLuint BaseInstance; <span class="code_text" style="color: #7D7D7D;">//The Index of the Vertex to start at in Instanced VAO attributes (For example if you wanted to pass in a DrawID)</span>
+};</pre></div><p>
+
+<p>The 'Indirect' refers to the idea that this array is located in a buffer on the GPU bound in OpenGL to GL_DRAW_INDIRECT_BUFFER.
+Because of that we can easily build multiple buffers for different purposes (ie. Scene, Transparent Objects, UI) then upload, bind and draw them. 
+
+This function is generally referenced when talking about saving CPU time by not having to call glDraw... a million times.
+But what we are using it for is it's simplicity. Ultimately what we want is to tell the GPU, "Here's a giant buffer of my data", draw everything.
+
+One of the caveats of using this however is that we need to have our mesh data in one vertex and one index buffer.
+There are many ways to accomplish this and what I usually do is register a mesh to OpenGL where it loads the mesh data into a giant vertex buffer and passes back the indirect command info needed to draw the mesh.</p></p><div class="code"><pre>
+registered_mesh Result;
+
+glNamedBufferSubData(GiantVertexBuffer, LoadedVertexCount, Mesh.VertexCount, Mesh.Data);
+glNamedBufferSubData(GiantIndexBuffer, LoadedIndexCount, Mesh.IndexCount, Mesh.Indices);
+LoadedVertexCount += Mesh.VertexCount;
+LoadedIndexCount += Mesh.IndexCount;
+
+Result.Count = Mesh.IndexCount
+Result.BaseVertex = LoadedVertexCount;
+Result.FirstIndex = LoadedIndexCount;
+<span class="code_text" style="color: #CD950C;">return</span> Result;
+</pre></div><p>
+
+With this method I usually have one large buffer for the current scene data and one large buffer for frame generated vertex data (UI, Particles, Anything Else).
+When we need to transition scenes we unload everything and register the new mesh data.
+You could also move mesh data in and out as needed in background threads. What ever is needed for your data, this function can make your life a lot simpler.<br><br>
+
+Now that we have our mesh data loaded and able to draw in one go, we need to find a way to texture and provide uniforms for every draw call.
+<br><br><h2 id="DSA">Direct State Access / Bindless Textures</h2>
+<p><a class="link" href="https://www.khronos.org/opengl/wiki/Direct_State_Access">Direct State Access Funcions</a><br>
+<a class="link" href="https://github.com/fendevel/Guide-to-Modern-OpenGL-Functions">Fendevel's Modern OpenGL Functions</a><br>
+<a class="link" href="https://www.nvidia.com/en-us/drivers/bindless-graphics/">NVIDIA's Bindless Graphgics Tutorial</a><br>
+<a class="link" href="https://cpp-rendering.io/opengl-azdo-bindless-textures/">Antoine Morrier's Bindless Textures</a><br>
+<a class="link" href="https://www.khronos.org/opengl/wiki/Bindless_Texture">Khronos's Bindless Textures</a><br><br>
+I am grouping these two ideas together because they both come with the idea that we can reference things with their handle rather than binding them to a context slot. DSA functions allow us to manipulate OpenGL objects (outside of drawing operations) without binding them. As mentioned, we still need to bind buffers when we run programs but anything before that we can manipulate them by object much like Vulkan and D3D12.
+
+Bindless Textures specifically allow us to reference textures in shaders by their "Resident" Handle rather than binding them to a texture slot. Making something Resident generally means that it is accessible by the GPU (In GPU Visible Memory). This handle is not a pointer to a virtual address on the GPU but something more like an handle in a table that you can expose to your shader code when you call glMakeTextreHandleResidentARB(). If this sounds like a black box that's because it kind of is. There isn't a lot of information out there as to what's going on in the driver or GPU but if you have worked with Vulkan or D3D12 I can imagine it's something like exposing a texture descriptor to your pipeline. I'm honestly not to sure and if anyone has any insight I would like to know. But anyway, here's how you set it up:</p>
+</p><div class="code"><pre>
+<span class="code_text" style="color: #7D7D7D;">//DSA Version of creating a texture</span>
+GLuint TextureID;
+glCreateTextures(GL_TEXTURE_2D, <span class="code_text" style="color: #6B8E23;">1</span>, &amp;TextureID);
+            
+glTextureParameteri(TextureID, GL_TEXTURE_WRAP_S, GL_REPEAT);
+glTextureParameteri(TextureID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+glTextureParameteri(TextureID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+glTextureParameteri(TextureID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+           
+glTextureStorage2D(TextureID, <span class="code_text" style="color: #6B8E23;">1</span>, GL_RGBA8, <span class="code_text" style="color: #6B8E23;">1</span>, <span class="code_text" style="color: #6B8E23;">1</span>);
+glTextureSubImage2D(TextureID, <span class="code_text" style="color: #6B8E23;">0</span>, <span class="code_text" style="color: #6B8E23;">0</span>, <span class="code_text" style="color: #6B8E23;">0</span>, <span class="code_text" style="color: #6B8E23;">1</span>, <span class="code_text" style="color: #6B8E23;">1</span>, GL_RGBA, GL_UNSIGNED_BYTE, (uint8_t*)TextureData);
+                       
+<span class="code_text" style="color: #7D7D7D;">//RETREVING BINDLESS HANDLE FOR LATER USAGE</span>
+uint64_t BindlessHandle = glGetTextureHandleARB(TextureID);
+glMakeTextureHandleResidentARB(BindlessHandle);
+BindlessTextureHandles[DrawIndex] = BindlessHandle;
+</pre></div><p>
+
+Loading them is similar to our mesh data where we upload the texture data needed for any given frame and store their Resident Handles in one large array.
+The BindlessTextureHandles[] Array is then uploaded to a UBO or SSBO, attached to the shader and any shader that needs a specific texture can just extract it's handle from it's index into the UBO or SSBO.
+<br><br>
+One thing to underline about Bindless Textures is that this is not a safe thing. If you reference a wrong Bindless Handle your program will probably crash without any way for OpenGL to catch or even tell you what went wrong. Thankfully there are many articles and tutorials talking about how to use them and the freedom of referencing any loaded texture in a shader is too useful to ignore. 
+
+
+Ultimately our shader code can begin to look like this.</p><div class="code"><pre>
+<span class="code_text" style="color: #7D7D7D;">//Shader Code</span>
+layout(binding = <span class="code_text" style="color: #6B8E23;">1</span>)uniform TextureArray
+{
+    uint64_t Textures[<span class="code_text" style="color: #6B8E23;">1024</span>];
+};
+
+layout(std430, row_major) buffer DrawUniforms
+{
+    draw_uniform DrawUniformArray[];
+};
+
+draw_uniform Uniform = DrawUniformArray[DrawID];
+sampler2D Sampler = sampler2D(Textures[Uniform.TextureID]);
+vec4 TextureColor = texture(Sampler, UV);
+</pre></div><p>
+
+Since we are using MultiDraw, we need to be able to index into a large uniform array using a DrawID of some sort. This is where that "BaseInstance" parameter in glMultiDrawElementIndirect comes in. Incrementing that  parameter every command will provide a base index to start from in a vertex attribute. This allows you to bind a monotonically increasing array in a VAO as demonstrated <a class="link" href="http://www.g-truc.net/post-0518.html">here</a>. There is also an <a class="link" href="https://github.com/KhronosGroup/OpenGL-Registry/blob/main/extensions/ARB/ARB_shader_draw_parameters.txt">ARB Extension</a> that provides a gl_DrawID implicit much like gl_InstanceID if you are lucky enough to have it. 
+If you have it you should use it because it is generally faster but if not the VAO DrawID method works great.<br><br>
+
+Now that we have our DrawID, we can index into our DrawUniformArray to extract that specific draw call's uniforms, extract any TextureIDs we want associated with that mesh and we are good to go.
+<br><br>
+We are however, dealing with a lot of data in our shaders. These uniform and texture arrays will start to get larger and larger. Luckily OpenGL has added special format buffers to handle the data needed to render a modern game or scene.
+
+<br><br><h2 id="UBO">UBO/SSBO's</h2>
+<p><a class="link" href="https://www.khronos.org/opengl/wiki/Uniform_Buffer_Object">Khronos Uniform Buffer Object</a><br>
+<a class="link" href="https://www.khronos.org/opengl/wiki/Shader_Storage_Buffer_Object">Khronos Shader Storage Buffer Object</a><br><br>
+The TextureArray in the snip above is a UBO and the unbounded DrawUniformArray below is a SSBO. They are both just large buffers but SSBO's have a few more restrictions on their layout requirements and are slower to read from than UBO's. The upside to them are that they can store much more data at a time, 128MB vs 16KB. At the same time we are building our draw commands, we can create one large array of uniforms and index into them using the same DrawID as before. These are generic uniform buffers similar to Vulkan or D3D12 where instead of setting a single uniform like a m4x4 with glUniformMatrix4fv(), we can have a struct or an array of structs.</p><div class="code"><pre>
+<span class="code_text" style="color: #CD950C;">struct</span> uniform {
+   uint TextureID;
+   <span class="code_text" style="color: #CD950C;">float</span>[<span class="code_text" style="color: #6B8E23;">3</span>] Pad;
+   m4x4 ObjectTransform;
+}
+</pre></div><p>
+
+And upload them to the GPU in a buffer.</p><div class="code"><pre>
+GLuint UniformBuffer;
+glCreateBuffers(<span class="code_text" style="color: #6B8E23;">1</span>, &amp;UniformBuffer);
+glNamedBufferData(UniformBuffer, <span class="code_text" style="color: #CD950C;">sizeof</span>(uniform)*DRAW_COUNT, UniformArray, GL_DYNAMIC_DRAW);
+
+GLuint UniformArrayID = glGetUniformBlockIndex(ShaderID, <span class="code_text" style="color: #6B8E23;">"UniformArray"</span>);
+glUniformBlockBinding(ShaderID, UniformArrayID, <span class="code_text" style="color: #6B8E23;">0</span>);
+glBindBufferBase(GL_UNIFORM_BUFFER, <span class="code_text" style="color: #6B8E23;">0</span>, UniformBuffer);
+    
+GLuint TextureArrayID = glGetUniformBlockIndex(ShaderID, <span class="code_text" style="color: #6B8E23;">"TextureArray"</span>);
+glUniformBlockBinding(ShaderID, TextureArrayID, <span class="code_text" style="color: #6B8E23;">1</span>);
+glBindBufferBase(GL_UNIFORM_BUFFER, <span class="code_text" style="color: #6B8E23;">1</span>, TextureBuffer);
+</pre></div><p>
+
+You'll notice the Pad member of the uniform struct. This is an <a class="link" href="https://www.khronos.org/opengl/wiki/Interface_Block_(GLSL)">Interface Block</a> alignment requirement and can get a little bit tricky if you aren't careful.</p>
+
+<br><br><h2 id="Conclusion">Conclusion</h2>
+<p>And that's pretty much it for our renderpass. If we wanted to add another pass such as a prepass-depth or a GBuffer stage, it is as simple as creating a specific uniform array for that pass, and uploading the relevant draw commands. Because we are dealing with large arrays and indirect buffers, we could also use a compute shader to cull draw commands so that we only draw relevant objects.
+<br><br>
+Once again here is the full <a class="link" href="https://github.com/JesseFong/minimal_modern_opengl">Source Code</a> if you want implementation details or to just get a clearer view of how these work together.
+<br><br>
+Even now in my personal projects, I have built up enough helper code that switching to D3D12 is starting to make more and more sense. But a lot of the advantages that these modern API's give came from and can still be found in OpenGL because these modern ideas came from the hard working people adding extensions and iterating on a workflow that is common to many needs of GPU programmers. Hopefully I have given some good evidence that OpenGL is still a useful tool even in 2021 and that D3D12 and Vulkan are standing on the shoulders of it's giant spec. And I wanted to point out that within this giant that is OpenGL, there are still needles in that haystack? Golden eggs I mean.. uhhh... I can't think of any more analogies... Thanks for reading.</p></div>
+<div class="separator reverse"></div>
+<div class="footer">
+</div></body>
+</html>
